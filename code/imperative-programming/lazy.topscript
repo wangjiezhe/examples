@@ -1,19 +1,19 @@
 1;;
-#part 1
+(* part 1 *)
 let v = lazy (print_string "performing lazy computation\n"; sqrt 16.);;
 Lazy.force v;;
 Lazy.force v;;
-#part 2
+(* part 2 *)
 type 'a lazy_state =
     | Delayed of (unit -> 'a)
     | Value of 'a
     | Exn of exn
   ;;
-#part 3
+(* part 3 *)
 let create_lazy f = ref (Delayed f);;
 let v = create_lazy
     (fun () -> print_string "performing lazy computation\n"; sqrt 16.);;
-#part 4
+(* part 4 *)
 let force v =
     match !v with
     | Value x -> x
@@ -27,7 +27,7 @@ let force v =
         v := Exn exn;
         raise exn
      ;;
-#part 5
+(* part 5 *)
 force v;;
 force v;;
 

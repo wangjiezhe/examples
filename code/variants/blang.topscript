@@ -5,18 +5,18 @@ type 'a expr =
     | Or    of 'a expr list
     | Not   of 'a expr
   ;;
-#part 1
+(* part 1 *)
 type mail_field = To | From | CC | Date | Subject
   type mail_predicate = { field: mail_field;
                           contains: string }
   ;;
-#part 2
+(* part 2 *)
 let test field contains = Base { field; contains };;
 And [ Or [ test To "doligez"; test CC "doligez" ];
         test Subject "runtime";
       ]
   ;;
-#part 3
+(* part 3 *)
 let rec eval expr base_eval =
     (* a shortcut, so we don't need to repeatedly pass [base_eval]
        explicitly to [eval] *)
@@ -28,7 +28,7 @@ let rec eval expr base_eval =
     | Or    exprs -> List.exists  exprs ~f:eval'
     | Not   expr  -> not (eval' expr)
   ;;
-#part 4
+(* part 4 *)
 let and_ l =
     if List.mem l (Const false) then Const false
     else
@@ -49,25 +49,25 @@ let and_ l =
     | Const b -> Const (not b)
     | e -> Not e
   ;;
-#part 5
+(* part 5 *)
 let rec simplify = function
     | Base _ | Const _ as x -> x
     | And l -> and_ (List.map ~f:simplify l)
     | Or l  -> or_  (List.map ~f:simplify l)
     | Not e -> not_ (simplify e)
   ;;
-#part 6
+(* part 6 *)
 simplify (Not (And [ Or [Base "it's snowing"; Const true];
                        Base "it's raining"]));;
-#part 7
+(* part 7 *)
 simplify (Not (And [ Or [Base "it's snowing"; Const true];
                        Not (Not (Base "it's raining"))]));;
-#part 8
+(* part 8 *)
 let not_ = function
     | Const b -> Const (not b)
     | (Base _ | And _ | Or _ | Not _) as e -> Not e
   ;;
-#part 9
+(* part 9 *)
 let not_ = function
     | Const b -> Const (not b)
     | Not e -> e

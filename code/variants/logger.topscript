@@ -13,7 +13,7 @@
         credentials: string;
       }
   end;;
-#part 1
+(* part 1 *)
 module Log_entry = struct
     type t =
       { session_id: string;
@@ -23,12 +23,12 @@ module Log_entry = struct
       }
   end
   ;;
-#part 2
+(* part 2 *)
 type client_message = | Logon of Logon.t
                         | Heartbeat of Heartbeat.t
                         | Log_entry of Log_entry.t
   ;;
-#part 3
+(* part 3 *)
 let messages_for_user user messages =
     let (user_messages,_) =
       List.fold messages ~init:([],String.Set.empty)
@@ -51,7 +51,7 @@ let messages_for_user user messages =
     in
     List.rev user_messages
   ;;
-#part 4
+(* part 4 *)
 module Log_entry = struct
     type t = { important: bool;
                message: string;
@@ -65,19 +65,19 @@ module Log_entry = struct
                credentials: string;
              }
   end ;;
-#part 5
+(* part 5 *)
 type details =
     | Logon of Logon.t
     | Heartbeat of Heartbeat.t
     | Log_entry of Log_entry.t
  ;;
-#part 6
+(* part 6 *)
 module Common = struct
     type t = { session_id: string;
                time: Time.t;
              }
   end ;;
-#part 7
+(* part 7 *)
 let messages_for_user user messages =
     let (user_messages,_) =
       List.fold messages ~init:([],String.Set.empty)
@@ -96,7 +96,7 @@ let messages_for_user user messages =
     in
     List.rev user_messages
   ;;
-#part 8
+(* part 8 *)
 let handle_message server_state (common,details) =
     match details with
     | Log_entry m -> handle_log_entry server_state (common,m)

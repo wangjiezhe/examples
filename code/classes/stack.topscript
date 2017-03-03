@@ -11,7 +11,7 @@ class ['a] stack init = object
     method push hd =
       v <- hd :: v
   end ;;
-#part 1
+(* part 1 *)
 class ['a] stack init = object
       val mutable v = init
     
@@ -25,14 +25,14 @@ class ['a] stack init = object
       method push hd = 
         v <- hd :: v
   end ;;
-#part 2
+(* part 2 *)
 class sstack init = object
     inherit [string] stack init
 
     method print =
       List.iter ~f:print_string v
   end ;;
-#part 3
+(* part 3 *)
 class double_stack init = object
     inherit [int] stack init as super
 

@@ -1,28 +1,28 @@
 module type X_int = sig val x : int end;;
-#part 1
+(* part 1 *)
 module Increment (M : X_int) : X_int = struct
     let x = M.x + 1
   end;;
-#part 2
+(* part 2 *)
 module Increment (M : X_int) = struct
     let x = M.x + 1
   end;;
-#part 3
+(* part 3 *)
 module Three = struct let x = 3 end;;
 module Four = Increment(Three);;
 Four.x - Three.x;;
-#part 4
+(* part 4 *)
 module Three_and_more = struct
     let x = 3
     let y = "three"
   end;;
 module Four = Increment(Three_and_more);;
-#part 5
+(* part 5 *)
 module type Comparable = sig
     type t
     val compare : t -> t -> int
   end ;;
-#part 6
+(* part 6 *)
 module Make_interval(Endpoint : Comparable) = struct
 
     type t = | Interval of Endpoint.t * Endpoint.t
@@ -58,36 +58,36 @@ module Make_interval(Endpoint : Comparable) = struct
         create (max l1 l2) (min h1 h2)
 
   end ;;
-#part 7
+(* part 7 *)
 module Int_interval =
     Make_interval(struct
       type t = int
       let compare = Int.compare
     end);;
-#part 8
+(* part 8 *)
 module Int_interval = Make_interval(Int) ;;
 module String_interval = Make_interval(String) ;;
-#part 9
+(* part 9 *)
 let i1 = Int_interval.create 3 8;;
 let i2 = Int_interval.create 4 10;;
 Int_interval.intersect i1 i2;;
-#part 10
+(* part 10 *)
 module Rev_int_interval =
     Make_interval(struct
       type t = int
       let compare x y = Int.compare y x
     end);;
-#part 11
+(* part 11 *)
 let interval = Int_interval.create 4 3;;
 let rev_interval = Rev_int_interval.create 4 3;;
-#part 12
+(* part 12 *)
 Int_interval.contains rev_interval 3;;
-#part 13
+(* part 13 *)
 Int_interval.is_empty (* going through create *)
     (Int_interval.create 4 3) ;;
 Int_interval.is_empty (* bypassing create *)
     (Int_interval.Interval (4,3)) ;;
-#part 14
+(* part 14 *)
 module type Interval_intf = sig
    type t
    type endpoint
@@ -96,7 +96,7 @@ module type Interval_intf = sig
    val contains : t -> endpoint -> bool
    val intersect : t -> t -> t
   end;;
-#part 15
+(* part 15 *)
 module Make_interval(Endpoint : Comparable) : Interval_intf = struct
 
     type endpoint = Endpoint.t
@@ -133,13 +133,13 @@ module Make_interval(Endpoint : Comparable) : Interval_intf = struct
         create (max l1 l2) (min h1 h2)
 
   end ;;
-#part 16
+(* part 16 *)
 module Int_interval = Make_interval(Int);;
 Int_interval.create 3 4;;
-#part 17
+(* part 17 *)
 module type Int_interval_intf =
     Interval_intf with type endpoint = int;;
-#part 18
+(* part 18 *)
 module Make_interval(Endpoint : Comparable)
       : (Interval_intf with type endpoint = Endpoint.t)
   = struct
@@ -177,14 +177,14 @@ module Make_interval(Endpoint : Comparable)
       | Interval (l1,h1), Interval (l2,h2) ->
         create (max l1 l2) (min h1 h2)
   end ;;
-#part 19
+(* part 19 *)
 module Int_interval = Make_interval(Int);;
 let i = Int_interval.create 3 4;;
 Int_interval.contains i 5;;
-#part 20
+(* part 20 *)
 module type Int_interval_intf =
     Interval_intf with type endpoint := int;;
-#part 21
+(* part 21 *)
 module Make_interval(Endpoint : Comparable)
     : Interval_intf with type endpoint := Endpoint.t =
   struct
@@ -223,19 +223,19 @@ module Make_interval(Endpoint : Comparable)
 
 
   end ;;
-#part 22
+(* part 22 *)
 module Int_interval = Make_interval(Int);;
 Int_interval.is_empty
     (Int_interval.create 3 4);;
 Int_interval.is_empty
     (Int_interval.Interval (4,3));;
-#part 23
+(* part 23 *)
 Sexp.of_string "(This is (an s-expression))";;
-#part 24
+(* part 24 *)
 type some_type = int * string list with sexp;;
 sexp_of_some_type (33, ["one"; "two"]);;
 Sexp.of_string "(44 (five six))" |> some_type_of_sexp;;
-#part 25
+(* part 25 *)
 module Make_interval(Endpoint : Comparable)
     : (Interval_intf with type endpoint := Endpoint.t) = struct
 
@@ -273,18 +273,18 @@ module Make_interval(Endpoint : Comparable)
         create (max l1 l2) (min h1 h2)
 
   end ;;
-#part 26
+(* part 26 *)
 module type Interval_intf_with_sexp = sig
    include Interval_intf
    include Sexpable with type t := t
   end;;
-#part 27
+(* part 27 *)
 module type Interval_intf_with_sexp = sig
    type t
    include Interval_intf with type t := t
    include Sexpable      with type t := t
   end;;
-#part 28
+(* part 28 *)
 module Make_interval(Endpoint : sig
                          type t
                          include Comparable with type t := t
@@ -333,78 +333,78 @@ module Make_interval(Endpoint : sig
       | Interval (l1,h1), Interval (l2,h2) ->
         create (max l1 l2) (min h1 h2)
   end;;
-#part 29
+(* part 29 *)
 module Int_interval = Make_interval(Int) ;;
 Int_interval.sexp_of_t (Int_interval.create 3 4);;
 Int_interval.sexp_of_t (Int_interval.create 4 3);;
-#part 30
-#part 31
-#part 32
-#part 33
-#part 34
-#part 35
-#part 36
-#part 37
-#part 38
-#part 39
-#part 40
-#part 41
-#part 42
-#part 43
-#part 44
-#part 45
-#part 46
-#part 47
-#part 48
-#part 49
-#part 50
-#part 51
-#part 52
-#part 53
-#part 54
-#part 55
-#part 56
-#part 57
-#part 58
-#part 59
-#part 60
-#part 61
-#part 62
-#part 63
-#part 64
-#part 65
-#part 66
-#part 67
-#part 68
-#part 69
-#part 70
-#part 71
-#part 72
-#part 73
-#part 74
-#part 75
-#part 76
-#part 77
-#part 78
-#part 79
-#part 80
-#part 81
-#part 82
-#part 83
-#part 84
-#part 85
-#part 86
-#part 87
-#part 88
-#part 89
-#part 90
-#part 91
-#part 92
-#part 93
-#part 94
-#part 95
-#part 96
-#part 97
-#part 98
-#part 99
-#part 100
+(* part 30 *)
+(* part 31 *)
+(* part 32 *)
+(* part 33 *)
+(* part 34 *)
+(* part 35 *)
+(* part 36 *)
+(* part 37 *)
+(* part 38 *)
+(* part 39 *)
+(* part 40 *)
+(* part 41 *)
+(* part 42 *)
+(* part 43 *)
+(* part 44 *)
+(* part 45 *)
+(* part 46 *)
+(* part 47 *)
+(* part 48 *)
+(* part 49 *)
+(* part 50 *)
+(* part 51 *)
+(* part 52 *)
+(* part 53 *)
+(* part 54 *)
+(* part 55 *)
+(* part 56 *)
+(* part 57 *)
+(* part 58 *)
+(* part 59 *)
+(* part 60 *)
+(* part 61 *)
+(* part 62 *)
+(* part 63 *)
+(* part 64 *)
+(* part 65 *)
+(* part 66 *)
+(* part 67 *)
+(* part 68 *)
+(* part 69 *)
+(* part 70 *)
+(* part 71 *)
+(* part 72 *)
+(* part 73 *)
+(* part 74 *)
+(* part 75 *)
+(* part 76 *)
+(* part 77 *)
+(* part 78 *)
+(* part 79 *)
+(* part 80 *)
+(* part 81 *)
+(* part 82 *)
+(* part 83 *)
+(* part 84 *)
+(* part 85 *)
+(* part 86 *)
+(* part 87 *)
+(* part 88 *)
+(* part 89 *)
+(* part 90 *)
+(* part 91 *)
+(* part 92 *)
+(* part 93 *)
+(* part 94 *)
+(* part 95 *)
+(* part 96 *)
+(* part 97 *)
+(* part 98 *)
+(* part 99 *)
+(* part 100 *)

@@ -1,5 +1,5 @@
 1;;
-#part 1
+(* part 1 *)
 let imm_stack init = object
     val v = init
 
@@ -12,7 +12,7 @@ let imm_stack init = object
       {< v = hd :: v >}
   end ;;
 
-#part 2
+(* part 2 *)
 let s = imm_stack [3; 2; 1] ;;
 let t = s#push 4 ;;
 s#pop ;;

@@ -1,5 +1,5 @@
 1;;
-#part 1
+(* part 1 *)
 let remember =
     let cache = ref None in
     (fun x ->
@@ -7,11 +7,11 @@ let remember =
        | Some y -> y
        | None -> cache := Some x; x)
   ;;
-#part 2
+(* part 2 *)
 let identity x = x;;
 identity 3;;
 identity "five";;
-#part 3
+(* part 3 *)
 let remember_three () = remember 3;;
 remember;;
 remember "avocado";;

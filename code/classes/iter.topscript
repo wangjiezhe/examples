@@ -1,5 +1,5 @@
 type 'a iterator = < get : 'a; has_value : bool; next : unit > ;;
-#part 1
+(* part 1 *)
 class ['a] list_iterator init = object
     val mutable current : 'a list = init
 
@@ -15,7 +15,7 @@ class ['a] list_iterator init = object
       | hd :: tl -> current <- tl
       | [] -> raise (Invalid_argument "no value")
    end  ;;
-#part 2
+(* part 2 *)
 class ['a] stack init = object
     val mutable v : 'a list = init
 
@@ -32,7 +32,7 @@ class ['a] stack init = object
     method iterator : 'a iterator =
       new list_iterator v
   end ;;
-#part 3
+(* part 3 *)
 let s = new stack [] ;;
 s#push 5 ;;
 s#push 4 ;;
@@ -42,7 +42,7 @@ it#next ;;
 it#get ;;
 it#next ;;
 it#has_value ;;
-#part 4
+(* part 4 *)
 class ['a] stack init = object
     val mutable v : 'a list = init
 
@@ -59,7 +59,7 @@ class ['a] stack init = object
    method iter f = 
      List.iter ~f v 
   end ;;
-#part 5
+(* part 5 *)
 class ['a] stack init = object
     val mutable v : 'a list = init
 

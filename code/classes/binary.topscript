@@ -8,15 +8,15 @@ class circle r = object(self : 'self)
     method area = 3.14 *. (Float.of_int self#radius) ** 2.0
     method equals (other : 'self) = other#radius = self#radius
   end ;;
-#part 1
+(* part 1 *)
 (new square 5)#equals (new square 5) ;;
 (new circle 10)#equals (new circle 7) ;;
-#part 2
+(* part 2 *)
 type shape = < equals : shape -> bool; area : float > ;;
 (new square 5 :> shape) ;;
-#part 3
+(* part 3 *)
 (object method area = 5 end) = (object method area = 5 end) ;;
-#part 4
+(* part 4 *)
 type shape_repr =
   | Square of int
   | Circle of int ;;
