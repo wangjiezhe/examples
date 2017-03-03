@@ -26,7 +26,7 @@ let first_timestamped list =
 let host_info_to_string { hostname = h; os_name = os;
                             cpu_arch = c; timestamp = ts;
                           } =
-       sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
+       sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts ~zone:Time.Zone.local);;
 host_info_to_string my_host;;
 (* part 6 *)
 type host_info =
@@ -41,12 +41,12 @@ type host_info =
 let host_info_to_string { hostname = h; os_name = os;
                             cpu_arch = c; timestamp = ts;
                           } =
-    sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
+    sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts ~zone:Time.Zone.local);;
 (* part 8 *)
 let host_info_to_string { hostname = h; os_name = os;
                             cpu_arch = c; timestamp = ts; _
                           } =
-    sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
+    sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts ~zone:Time.Zone.local);;
 (* part 9 *)
 let host_info_to_string { hostname; os_name; cpu_arch; timestamp; _ } =
      sprintf "%s (%s / %s) <%s>" hostname os_name cpu_arch
