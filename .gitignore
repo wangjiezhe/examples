@@ -30,3 +30,5 @@ a.out
 .settings
 /commenting-build
 _build
+\#*\#
+.\#*
