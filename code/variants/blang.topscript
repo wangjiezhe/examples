@@ -7,9 +7,9 @@ type 'a expr =
   ;;
 (* part 1 *)
 type mail_field = To | From | CC | Date | Subject
-  type mail_predicate = { field: mail_field;
-                          contains: string }
-  ;;
+type mail_predicate = { field: mail_field;
+                        contains: string }
+;;
 (* part 2 *)
 let test field contains = Base { field; contains };;
 And [ Or [ test To "doligez"; test CC "doligez" ];
@@ -37,18 +37,18 @@ let and_ l =
       | [ x ] -> x
       | l -> And l
 
-  let or_ l =
-    if List.mem l (Const true) then Const true
-    else
-      match List.filter l ~f:((<>) (Const false)) with
-      | [] -> Const false
-      | [x] -> x
-      | l -> Or l
+let or_ l =
+  if List.mem l (Const true) then Const true
+  else
+    match List.filter l ~f:((<>) (Const false)) with
+    | [] -> Const false
+    | [x] -> x
+    | l -> Or l
 
-  let not_ = function
-    | Const b -> Const (not b)
-    | e -> Not e
-  ;;
+let not_ = function
+  | Const b -> Const (not b)
+  | e -> Not e
+;;
 (* part 5 *)
 let rec simplify = function
     | Base _ | Const _ as x -> x

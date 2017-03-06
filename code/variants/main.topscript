@@ -11,10 +11,10 @@ List.map ~f:basic_color_to_int [Blue;Red];;
 let color_by_number number text =
     sprintf "\027[38;5;%dm%s\027[0m" number text;;
 let blue = color_by_number (basic_color_to_int Blue) "Blue";;
-(* printf "Hello %s World!\n" blue*) ();;
+printf "Hello %s World!\n" blue;;
 (* part 3 *)
 type weight = Regular | Bold
-  type color =
+type color =
   | Basic of basic_color * weight (* basic colors, regular and bold *)
   | RGB   of int * int * int       (* 6x6x6 color cube *)
   | Gray  of int                   (* 24 grayscale levels *)
@@ -30,8 +30,8 @@ let color_to_int = function
 (* part 5 *)
 let color_print color s =
      printf "%s\n" (color_by_number (color_to_int color) s);;
-(* color_print (Basic (Red,Bold)) "A bold red!"*) ();;
-(* color_print (Gray 4) "A muted gray..." *) ();;
+color_print (Basic (Red,Bold)) "A bold red!";;
+color_print (Gray 4) "A muted gray...";;
 (* part 6 *)
 let three = `Int 3;;
 let four = `Float 4.;;
@@ -71,13 +71,13 @@ let basic_color_to_int = function
     | `Black -> 0 | `Red     -> 1 | `Green -> 2 | `Yellow -> 3
     | `Blue  -> 4 | `Magenta -> 5 | `Cyan  -> 6 | `White  -> 7
 
-  let color_to_int = function
-    | `Basic (basic_color,weight) ->
-      let base = match weight with `Bold -> 8 | `Regular -> 0 in
-      base + basic_color_to_int basic_color
-    | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-    | `Gray i -> 232 + i
- ;;
+let color_to_int = function
+  | `Basic (basic_color,weight) ->
+    let base = match weight with `Bold -> 8 | `Regular -> 0 in
+    base + basic_color_to_int basic_color
+  | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+  | `Gray i -> 232 + i
+;;
 (* part 14 *)
 let extended_color_to_int = function
     | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
@@ -131,4 +131,3 @@ is_positive_permissive (`Floot 3.5);;
 (* part 48 *)
 (* part 49 *)
 (* part 50 *)
-
