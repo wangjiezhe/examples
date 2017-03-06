@@ -5,7 +5,7 @@ open Core.Std
 type t =
   | Range of int * int
   | Empty
-with sexp
+[@@deriving sexp]
 
 let is_empty =
   function 

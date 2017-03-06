@@ -5,7 +5,7 @@
         user: string;
         credentials: string;
       }
-    with fields
+    [@@deriving fields]
   end;;
 module Logon :
   sig

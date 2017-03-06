@@ -27,12 +27,12 @@ Error.of_thunk (fun () ->
 (* part 7 *)
 Error.create "Something failed a long time ago" Time.epoch Time.sexp_of_t;;
 (* part 8 *)
-let custom_to_sexp = <:sexp_of<float * string list * int>>;;
+let custom_to_sexp = [%sexp_of: float * string list * int];;
 custom_to_sexp (3.5, ["a";"b";"c"], 6034);;
 (* part 9 *)
 Error.create "Something went terribly wrong"
     (3.5, ["a";"b";"c"], 6034)
-    <:sexp_of<float * string list * int>> ;;
+    [%sexp_of: float * string list * int] ;;
 (* part 10 *)
 Error.tag
     (Error.of_list [ Error.of_string "Your tires were slashed";
@@ -95,7 +95,7 @@ let rec forever () = forever ();;
 exception Wrong_date of Date.t;;
 Wrong_date (Date.of_string "2011-02-23");;
 (* part 24 *)
-exception Wrong_date of Date.t with sexp;;
+exception Wrong_date of Date.t [@@deriving sexp];;
 Wrong_date (Date.of_string "2011-02-23");;
 (* part 25 *)
 let failwith msg = raise (Failure msg);;
@@ -126,7 +126,7 @@ let merge_lists xs ys ~f =
 merge_lists [1;2;3] [-1] ~f:(+);;
 (* part 28 *)
 let reminders_of_sexp =
-    <:of_sexp<(Time.t * string) list>>
+    [%of_sexp: (Time.t * string) list]
   ;;
 let load_reminders filename =
     let inc = In_channel.create filename in

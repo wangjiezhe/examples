@@ -3,7 +3,7 @@
     include Comparable.S with type t := t
   end = struct
     module T = struct
-      type t = { foo: Int.Set.t; bar: string } with sexp, compare
+      type t = { foo: Int.Set.t; bar: string } [@@deriving sexp], compare
     end
     include T
     include Comparable.Make(T)

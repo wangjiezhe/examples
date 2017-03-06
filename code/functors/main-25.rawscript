@@ -3,7 +3,7 @@
 
     type t = | Interval of Endpoint.t * Endpoint.t
              | Empty
-    with sexp
+    [@@deriving sexp]
 
     ...
 

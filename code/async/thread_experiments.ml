@@ -18,7 +18,7 @@ type how_to_wait =
   | Busyloop_in_thread
   | Noalloc_busyloop_in_thread
   | Noalloc_busyloop_in_thread_2
-with sexp
+[@@deriving sexp]
 
 let busyloop () =
   let x = ref None in

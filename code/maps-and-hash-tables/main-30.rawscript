@@ -3,7 +3,7 @@
     include Hashable.S with type t := t
   end = struct
     module T = struct
-      type t = { foo: int; bar: string } with sexp, compare
+      type t = { foo: int; bar: string } [@@deriving sexp], compare
       let hash t =
         (Int.hash t.foo) lxor (String.hash t.bar)
     end

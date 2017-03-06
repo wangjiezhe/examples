@@ -1,7 +1,7 @@
-type t = { foo: int; bar: float } with sexp ;;
+type t = { foo: int; bar: float } [@@deriving sexp] ;;
 t_of_sexp (Sexp.of_string "((bar 35) (foo 3))") ;;
 (* part 1 *)
 exception Bad_message of string list ;;
 Exn.to_string (Bad_message ["1";"2";"3"]) ;;
-exception Good_message of string list with sexp;;
+exception Good_message of string list [@@deriving sexp];;
 Exn.to_string (Good_message ["1";"2";"3"]) ;;

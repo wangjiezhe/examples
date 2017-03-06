@@ -198,7 +198,7 @@ module Logon = struct
         user: string;
         credentials: string;
       }
-    with fields
+    [@@deriving fields]
   end;;
 (* part 30 *)
 let get_users logons = List.dedup (List.map logons ~f:Logon.user);;

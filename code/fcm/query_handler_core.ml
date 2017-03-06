@@ -4,7 +4,7 @@ module type Query_handler = sig
 
   (** Configuration for a query handler.  Note that this can be
       converted to and from an s-expression *)
-  type config with sexp
+  type config [@@deriving sexp]
 
   (** The name of the query-handling service *)
   val name : string
@@ -21,7 +21,7 @@ module type Query_handler = sig
 end
 
 module Unique = struct
-  type config = int with sexp
+  type config = int [@@deriving sexp]
   type t = { mutable next_id: int }
 
   let name = "unique"
@@ -37,7 +37,7 @@ module Unique = struct
 end
 
 module List_dir = struct
-  type config = string with sexp
+  type config = string [@@deriving sexp]
   type t = { cwd: string }
 
   (** [is_abs p] Returns true if [p] is an absolute path  *)
@@ -120,7 +120,7 @@ let list_dir_instance = build_instance (module List_dir)  "/var";;
 (* part 1 *)
 module Loader = struct
   type config = (module Query_handler) list sexp_opaque
-  with sexp
+  [@@deriving sexp]
 
   type t = { known  : (module Query_handler)          String.Table.t
            ; active : (module Query_handler_instance) String.Table.t
@@ -169,7 +169,7 @@ module Loader = struct
     | Unload of string
     | Known_services
     | Active_services
-  with sexp
+  [@@deriving sexp]
 (* part 6 *)
   let eval t sexp =
     match Or_error.try_with (fun () -> request_of_sexp sexp) with
