@@ -23,6 +23,7 @@ let string_of__1 ?(len = 1024) x =
 let read__1 = (
   fun p lb ->
     Yojson.Safe.read_space p lb;
+    
     match Yojson.Safe.start_any_variant p lb with
       | `Edgy_bracket -> (
           Yojson.Safe.read_space p lb;
@@ -57,7 +58,7 @@ let read__1 = (
                   raise (Exit)
                 )
               with Exit -> (
-                  Ag_oj_run.invalid_variant_tag (String.sub s pos len)
+                  Ag_oj_run.invalid_variant_tag p (String.sub s pos len)
                 )
           in
           let i = Yojson.Safe.map_ident p f lb in
@@ -65,7 +66,7 @@ let read__1 = (
             | 0 ->
               Yojson.Safe.read_space p lb;
               Yojson.Safe.read_gt p lb;
-              None
+              (None : _ option)
             | 1 ->
               Ag_oj_run.read_until_field_value p lb;
               let x = (
@@ -74,7 +75,7 @@ let read__1 = (
               in
               Yojson.Safe.read_space p lb;
               Yojson.Safe.read_gt p lb;
-              Some x
+              (Some x : _ option)
             | _ -> (
                 assert false
               )
@@ -92,13 +93,13 @@ let read__1 = (
                   raise (Exit)
                 )
               with Exit -> (
-                  Ag_oj_run.invalid_variant_tag (String.sub s pos len)
+                  Ag_oj_run.invalid_variant_tag p (String.sub s pos len)
                 )
           in
           let i = Yojson.Safe.map_string p f lb in
           match i with
             | 0 ->
-              None
+              (None : _ option)
             | _ -> (
                 assert false
               )
@@ -117,7 +118,7 @@ let read__1 = (
                   raise (Exit)
                 )
               with Exit -> (
-                  Ag_oj_run.invalid_variant_tag (String.sub s pos len)
+                  Ag_oj_run.invalid_variant_tag p (String.sub s pos len)
                 )
           in
           let i = Yojson.Safe.map_ident p f lb in
@@ -132,7 +133,7 @@ let read__1 = (
               in
               Yojson.Safe.read_space p lb;
               Yojson.Safe.read_rbr p lb;
-              Some x
+              (Some x : _ option)
             | _ -> (
                 assert false
               )
@@ -140,7 +141,7 @@ let read__1 = (
 )
 let _1_of_string s =
   read__1 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
-let write_org = (
+let write_org : _ -> org -> _ = (
   fun ob x ->
     Bi_outbuf.add_char ob '{';
     let is_first = ref true in
@@ -223,17 +224,13 @@ let read_org = (
   fun p lb ->
     Yojson.Safe.read_space p lb;
     Yojson.Safe.read_lcurl p lb;
-    let x =
-      {
-        login = Obj.magic 0.0;
-        id = Obj.magic 0.0;
-        url = Obj.magic 0.0;
-        name = None;
-        blog = None;
-        email = None;
-        public_repos = Obj.magic 0.0;
-      }
-    in
+    let field_login = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let field_id = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let field_url = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let field_name = ref (None) in
+    let field_blog = ref (None) in
+    let field_email = ref (None) in
+    let field_public_repos = ref (Obj.magic (Sys.opaque_identity 0.0)) in
     let bits0 = ref 0 in
     try
       Yojson.Safe.read_space p lb;
@@ -321,69 +318,62 @@ let read_org = (
       (
         match i with
           | 0 ->
-            let v =
+            field_login := (
               (
                 Ag_oj_run.read_string
               ) p lb
-            in
-            Obj.set_field (Obj.repr x) 0 (Obj.repr v);
+            );
             bits0 := !bits0 lor 0x1;
           | 1 ->
-            let v =
+            field_id := (
               (
                 Ag_oj_run.read_int
               ) p lb
-            in
-            Obj.set_field (Obj.repr x) 1 (Obj.repr v);
+            );
             bits0 := !bits0 lor 0x2;
           | 2 ->
-            let v =
+            field_url := (
               (
                 Ag_oj_run.read_string
               ) p lb
-            in
-            Obj.set_field (Obj.repr x) 2 (Obj.repr v);
+            );
             bits0 := !bits0 lor 0x4;
           | 3 ->
             if not (Yojson.Safe.read_null_if_possible p lb) then (
-              let v =
+              field_name := (
                 Some (
                   (
                     Ag_oj_run.read_string
                   ) p lb
                 )
-              in
-              Obj.set_field (Obj.repr x) 3 (Obj.repr v);
+              );
             )
           | 4 ->
             if not (Yojson.Safe.read_null_if_possible p lb) then (
-              let v =
+              field_blog := (
                 Some (
                   (
                     Ag_oj_run.read_string
                   ) p lb
                 )
-              in
-              Obj.set_field (Obj.repr x) 4 (Obj.repr v);
+              );
             )
           | 5 ->
             if not (Yojson.Safe.read_null_if_possible p lb) then (
-              let v =
+              field_email := (
                 Some (
                   (
                     Ag_oj_run.read_string
                   ) p lb
                 )
-              in
-              Obj.set_field (Obj.repr x) 5 (Obj.repr v);
+              );
             )
           | 6 ->
-            let v =
+            field_public_repos := (
               (
                 Ag_oj_run.read_int
               ) p lb
-            in
-            Obj.set_field (Obj.repr x) 6 (Obj.repr v);
+            );
             bits0 := !bits0 lor 0x8;
           | _ -> (
               Yojson.Safe.skip_json p lb
@@ -475,69 +465,62 @@ let read_org = (
         (
           match i with
             | 0 ->
-              let v =
+              field_login := (
                 (
                   Ag_oj_run.read_string
                 ) p lb
-              in
-              Obj.set_field (Obj.repr x) 0 (Obj.repr v);
+              );
               bits0 := !bits0 lor 0x1;
             | 1 ->
-              let v =
+              field_id := (
                 (
                   Ag_oj_run.read_int
                 ) p lb
-              in
-              Obj.set_field (Obj.repr x) 1 (Obj.repr v);
+              );
               bits0 := !bits0 lor 0x2;
             | 2 ->
-              let v =
+              field_url := (
                 (
                   Ag_oj_run.read_string
                 ) p lb
-              in
-              Obj.set_field (Obj.repr x) 2 (Obj.repr v);
+              );
               bits0 := !bits0 lor 0x4;
             | 3 ->
               if not (Yojson.Safe.read_null_if_possible p lb) then (
-                let v =
+                field_name := (
                   Some (
                     (
                       Ag_oj_run.read_string
                     ) p lb
                   )
-                in
-                Obj.set_field (Obj.repr x) 3 (Obj.repr v);
+                );
               )
             | 4 ->
               if not (Yojson.Safe.read_null_if_possible p lb) then (
-                let v =
+                field_blog := (
                   Some (
                     (
                       Ag_oj_run.read_string
                     ) p lb
                   )
-                in
-                Obj.set_field (Obj.repr x) 4 (Obj.repr v);
+                );
               )
             | 5 ->
               if not (Yojson.Safe.read_null_if_possible p lb) then (
-                let v =
+                field_email := (
                   Some (
                     (
                       Ag_oj_run.read_string
                     ) p lb
                   )
-                in
-                Obj.set_field (Obj.repr x) 5 (Obj.repr v);
+                );
               )
             | 6 ->
-              let v =
+              field_public_repos := (
                 (
                   Ag_oj_run.read_int
                 ) p lb
-              in
-              Obj.set_field (Obj.repr x) 6 (Obj.repr v);
+              );
               bits0 := !bits0 lor 0x8;
             | _ -> (
                 Yojson.Safe.skip_json p lb
@@ -546,8 +529,18 @@ let read_org = (
       done;
       assert false;
     with Yojson.End_of_object -> (
-        if !bits0 <> 0xf then Ag_oj_run.missing_fields [| !bits0 |] [| "login"; "id"; "url"; "public_repos" |];
-        Ag_oj_run.identity x
+        if !bits0 <> 0xf then Ag_oj_run.missing_fields p [| !bits0 |] [| "login"; "id"; "url"; "public_repos" |];
+        (
+          {
+            login = !field_login;
+            id = !field_id;
+            url = !field_url;
+            name = !field_name;
+            blog = !field_blog;
+            email = !field_email;
+            public_repos = !field_public_repos;
+          }
+         : org)
       )
 )
 let org_of_string s =

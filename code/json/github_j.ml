@@ -8,11 +8,6 @@ type app = Github_t.app = {
   app_url (*atd url *): string
 }
 
-type authorization_request = Github_t.authorization_request = {
-  auth_req_scopes (*atd scopes *): scope list;
-  auth_req_note (*atd note *): string
-}
-
 type authorization_response = Github_t.authorization_response = {
   scopes: scope list;
   token: string;
@@ -23,9 +18,14 @@ type authorization_response = Github_t.authorization_response = {
   note_url: string option
 }
 
+type authorization_request = Github_t.authorization_request = {
+  auth_req_scopes (*atd scopes *): scope list;
+  auth_req_note (*atd note *): string
+}
+
 let write_scope = (
-  fun ob x ->
-    match x with
+  fun ob sum ->
+    match sum with
       | `User -> Bi_outbuf.add_string ob "<\"user\">"
       | `Public_repo -> Bi_outbuf.add_string ob "<\"public_repo\">"
       | `Repo -> Bi_outbuf.add_string ob "<\"repo\">"
@@ -40,6 +40,7 @@ let string_of_scope ?(len = 1024) x =
 let read_scope = (
   fun p lb ->
     Yojson.Safe.read_space p lb;
+    
     match Yojson.Safe.start_any_variant p lb with
       | `Edgy_bracket -> (
           Yojson.Safe.read_space p lb;
@@ -113,7 +114,7 @@ let read_scope = (
                       raise (Exit)
                     )
               with Exit -> (
-                  Ag_oj_run.invalid_variant_tag (String.sub s pos len)
+                  Ag_oj_run.invalid_variant_tag p (String.sub s pos len)
                 )
           in
           let i = Yojson.Safe.map_ident p f lb in
@@ -217,7 +218,7 @@ let read_scope = (
                       raise (Exit)
                     )
               with Exit -> (
-                  Ag_oj_run.invalid_variant_tag (String.sub s pos len)
+                  Ag_oj_run.invalid_variant_tag p (String.sub s pos len)
                 )
           in
           let i = Yojson.Safe.map_string p f lb in
@@ -244,7 +245,7 @@ let read_scope = (
             fun s pos len ->
               if pos < 0 || len < 0 || pos + len > String.length s then
                 invalid_arg "out-of-bounds substring position or length";
-              Ag_oj_run.invalid_variant_tag (String.sub s pos len)
+              Ag_oj_run.invalid_variant_tag p (String.sub s pos len)
           in
           let i = Yojson.Safe.map_ident p f lb in
           match i with
@@ -255,7 +256,7 @@ let read_scope = (
 )
 let scope_of_string s =
   read_scope (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
-let write_app = (
+let write_app : _ -> app -> _ = (
   fun ob x ->
     Bi_outbuf.add_char ob '{';
     let is_first = ref true in
@@ -287,12 +288,8 @@ let read_app = (
   fun p lb ->
     Yojson.Safe.read_space p lb;
     Yojson.Safe.read_lcurl p lb;
-    let x =
-      {
-        app_name = Obj.magic 0.0;
-        app_url = Obj.magic 0.0;
-      }
-    in
+    let field_app_name = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let field_app_url = ref (Obj.magic (Sys.opaque_identity 0.0)) in
     let bits0 = ref 0 in
     try
       Yojson.Safe.read_space p lb;
@@ -328,20 +325,18 @@ let read_app = (
       (
         match i with
           | 0 ->
-            let v =
+            field_app_name := (
               (
                 Ag_oj_run.read_string
               ) p lb
-            in
-            Obj.set_field (Obj.repr x) 0 (Obj.repr v);
+            );
             bits0 := !bits0 lor 0x1;
           | 1 ->
-            let v =
+            field_app_url := (
               (
                 Ag_oj_run.read_string
               ) p lb
-            in
-            Obj.set_field (Obj.repr x) 1 (Obj.repr v);
+            );
             bits0 := !bits0 lor 0x2;
           | _ -> (
               Yojson.Safe.skip_json p lb
@@ -381,20 +376,18 @@ let read_app = (
         (
           match i with
             | 0 ->
-              let v =
+              field_app_name := (
                 (
                   Ag_oj_run.read_string
                 ) p lb
-              in
-              Obj.set_field (Obj.repr x) 0 (Obj.repr v);
+              );
               bits0 := !bits0 lor 0x1;
             | 1 ->
-              let v =
+              field_app_url := (
                 (
                   Ag_oj_run.read_string
                 ) p lb
-              in
-              Obj.set_field (Obj.repr x) 1 (Obj.repr v);
+              );
               bits0 := !bits0 lor 0x2;
             | _ -> (
                 Yojson.Safe.skip_json p lb
@@ -403,182 +396,17 @@ let read_app = (
       done;
       assert false;
     with Yojson.End_of_object -> (
-        if !bits0 <> 0x3 then Ag_oj_run.missing_fields [| !bits0 |] [| "name"; "url" |];
-        Ag_oj_run.identity x
+        if !bits0 <> 0x3 then Ag_oj_run.missing_fields p [| !bits0 |] [| "name"; "url" |];
+        (
+          {
+            app_name = !field_app_name;
+            app_url = !field_app_url;
+          }
+         : app)
       )
 )
 let app_of_string s =
   read_app (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
-let write__1 = (
-  Ag_oj_run.write_list (
-    write_scope
-  )
-)
-let string_of__1 ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
-  write__1 ob x;
-  Bi_outbuf.contents ob
-let read__1 = (
-  Ag_oj_run.read_list (
-    read_scope
-  )
-)
-let _1_of_string s =
-  read__1 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
-let write_authorization_request = (
-  fun ob x ->
-    Bi_outbuf.add_char ob '{';
-    let is_first = ref true in
-    if !is_first then
-      is_first := false
-    else
-      Bi_outbuf.add_char ob ',';
-    Bi_outbuf.add_string ob "\"scopes\":";
-    (
-      write__1
-    )
-      ob x.auth_req_scopes;
-    if !is_first then
-      is_first := false
-    else
-      Bi_outbuf.add_char ob ',';
-    Bi_outbuf.add_string ob "\"note\":";
-    (
-      Yojson.Safe.write_string
-    )
-      ob x.auth_req_note;
-    Bi_outbuf.add_char ob '}';
-)
-let string_of_authorization_request ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
-  write_authorization_request ob x;
-  Bi_outbuf.contents ob
-let read_authorization_request = (
-  fun p lb ->
-    Yojson.Safe.read_space p lb;
-    Yojson.Safe.read_lcurl p lb;
-    let x =
-      {
-        auth_req_scopes = Obj.magic 0.0;
-        auth_req_note = Obj.magic 0.0;
-      }
-    in
-    let bits0 = ref 0 in
-    try
-      Yojson.Safe.read_space p lb;
-      Yojson.Safe.read_object_end lb;
-      Yojson.Safe.read_space p lb;
-      let f =
-        fun s pos len ->
-          if pos < 0 || len < 0 || pos + len > String.length s then
-            invalid_arg "out-of-bounds substring position or length";
-          match len with
-            | 4 -> (
-                if String.unsafe_get s pos = 'n' && String.unsafe_get s (pos+1) = 'o' && String.unsafe_get s (pos+2) = 't' && String.unsafe_get s (pos+3) = 'e' then (
-                  1
-                )
-                else (
-                  -1
-                )
-              )
-            | 6 -> (
-                if String.unsafe_get s pos = 's' && String.unsafe_get s (pos+1) = 'c' && String.unsafe_get s (pos+2) = 'o' && String.unsafe_get s (pos+3) = 'p' && String.unsafe_get s (pos+4) = 'e' && String.unsafe_get s (pos+5) = 's' then (
-                  0
-                )
-                else (
-                  -1
-                )
-              )
-            | _ -> (
-                -1
-              )
-      in
-      let i = Yojson.Safe.map_ident p f lb in
-      Ag_oj_run.read_until_field_value p lb;
-      (
-        match i with
-          | 0 ->
-            let v =
-              (
-                read__1
-              ) p lb
-            in
-            Obj.set_field (Obj.repr x) 0 (Obj.repr v);
-            bits0 := !bits0 lor 0x1;
-          | 1 ->
-            let v =
-              (
-                Ag_oj_run.read_string
-              ) p lb
-            in
-            Obj.set_field (Obj.repr x) 1 (Obj.repr v);
-            bits0 := !bits0 lor 0x2;
-          | _ -> (
-              Yojson.Safe.skip_json p lb
-            )
-      );
-      while true do
-        Yojson.Safe.read_space p lb;
-        Yojson.Safe.read_object_sep p lb;
-        Yojson.Safe.read_space p lb;
-        let f =
-          fun s pos len ->
-            if pos < 0 || len < 0 || pos + len > String.length s then
-              invalid_arg "out-of-bounds substring position or length";
-            match len with
-              | 4 -> (
-                  if String.unsafe_get s pos = 'n' && String.unsafe_get s (pos+1) = 'o' && String.unsafe_get s (pos+2) = 't' && String.unsafe_get s (pos+3) = 'e' then (
-                    1
-                  )
-                  else (
-                    -1
-                  )
-                )
-              | 6 -> (
-                  if String.unsafe_get s pos = 's' && String.unsafe_get s (pos+1) = 'c' && String.unsafe_get s (pos+2) = 'o' && String.unsafe_get s (pos+3) = 'p' && String.unsafe_get s (pos+4) = 'e' && String.unsafe_get s (pos+5) = 's' then (
-                    0
-                  )
-                  else (
-                    -1
-                  )
-                )
-              | _ -> (
-                  -1
-                )
-        in
-        let i = Yojson.Safe.map_ident p f lb in
-        Ag_oj_run.read_until_field_value p lb;
-        (
-          match i with
-            | 0 ->
-              let v =
-                (
-                  read__1
-                ) p lb
-              in
-              Obj.set_field (Obj.repr x) 0 (Obj.repr v);
-              bits0 := !bits0 lor 0x1;
-            | 1 ->
-              let v =
-                (
-                  Ag_oj_run.read_string
-                ) p lb
-              in
-              Obj.set_field (Obj.repr x) 1 (Obj.repr v);
-              bits0 := !bits0 lor 0x2;
-            | _ -> (
-                Yojson.Safe.skip_json p lb
-              )
-        );
-      done;
-      assert false;
-    with Yojson.End_of_object -> (
-        if !bits0 <> 0x3 then Ag_oj_run.missing_fields [| !bits0 |] [| "scopes"; "note" |];
-        Ag_oj_run.identity x
-      )
-)
-let authorization_request_of_string s =
-  read_authorization_request (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
 let write__2 = (
   Ag_oj_run.write_option (
     Yojson.Safe.write_string
@@ -591,6 +419,7 @@ let string_of__2 ?(len = 1024) x =
 let read__2 = (
   fun p lb ->
     Yojson.Safe.read_space p lb;
+    
     match Yojson.Safe.start_any_variant p lb with
       | `Edgy_bracket -> (
           Yojson.Safe.read_space p lb;
@@ -625,7 +454,7 @@ let read__2 = (
                   raise (Exit)
                 )
               with Exit -> (
-                  Ag_oj_run.invalid_variant_tag (String.sub s pos len)
+                  Ag_oj_run.invalid_variant_tag p (String.sub s pos len)
                 )
           in
           let i = Yojson.Safe.map_ident p f lb in
@@ -633,7 +462,7 @@ let read__2 = (
             | 0 ->
               Yojson.Safe.read_space p lb;
               Yojson.Safe.read_gt p lb;
-              None
+              (None : _ option)
             | 1 ->
               Ag_oj_run.read_until_field_value p lb;
               let x = (
@@ -642,7 +471,7 @@ let read__2 = (
               in
               Yojson.Safe.read_space p lb;
               Yojson.Safe.read_gt p lb;
-              Some x
+              (Some x : _ option)
             | _ -> (
                 assert false
               )
@@ -660,13 +489,13 @@ let read__2 = (
                   raise (Exit)
                 )
               with Exit -> (
-                  Ag_oj_run.invalid_variant_tag (String.sub s pos len)
+                  Ag_oj_run.invalid_variant_tag p (String.sub s pos len)
                 )
           in
           let i = Yojson.Safe.map_string p f lb in
           match i with
             | 0 ->
-              None
+              (None : _ option)
             | _ -> (
                 assert false
               )
@@ -685,7 +514,7 @@ let read__2 = (
                   raise (Exit)
                 )
               with Exit -> (
-                  Ag_oj_run.invalid_variant_tag (String.sub s pos len)
+                  Ag_oj_run.invalid_variant_tag p (String.sub s pos len)
                 )
           in
           let i = Yojson.Safe.map_ident p f lb in
@@ -700,7 +529,7 @@ let read__2 = (
               in
               Yojson.Safe.read_space p lb;
               Yojson.Safe.read_rbr p lb;
-              Some x
+              (Some x : _ option)
             | _ -> (
                 assert false
               )
@@ -708,7 +537,23 @@ let read__2 = (
 )
 let _2_of_string s =
   read__2 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
-let write_authorization_response = (
+let write__1 = (
+  Ag_oj_run.write_list (
+    write_scope
+  )
+)
+let string_of__1 ?(len = 1024) x =
+  let ob = Bi_outbuf.create len in
+  write__1 ob x;
+  Bi_outbuf.contents ob
+let read__1 = (
+  Ag_oj_run.read_list (
+    read_scope
+  )
+)
+let _1_of_string s =
+  read__1 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
+let write_authorization_response : _ -> authorization_response -> _ = (
   fun ob x ->
     Bi_outbuf.add_char ob '{';
     let is_first = ref true in
@@ -789,17 +634,13 @@ let read_authorization_response = (
   fun p lb ->
     Yojson.Safe.read_space p lb;
     Yojson.Safe.read_lcurl p lb;
-    let x =
-      {
-        scopes = Obj.magic 0.0;
-        token = Obj.magic 0.0;
-        app = Obj.magic 0.0;
-        url = Obj.magic 0.0;
-        id = Obj.magic 0.0;
-        note = None;
-        note_url = None;
-      }
-    in
+    let field_scopes = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let field_token = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let field_app = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let field_url = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let field_id = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let field_note = ref (None) in
+    let field_note_url = ref (None) in
     let bits0 = ref 0 in
     try
       Yojson.Safe.read_space p lb;
@@ -881,66 +722,59 @@ let read_authorization_response = (
       (
         match i with
           | 0 ->
-            let v =
+            field_scopes := (
               (
                 read__1
               ) p lb
-            in
-            Obj.set_field (Obj.repr x) 0 (Obj.repr v);
+            );
             bits0 := !bits0 lor 0x1;
           | 1 ->
-            let v =
+            field_token := (
               (
                 Ag_oj_run.read_string
               ) p lb
-            in
-            Obj.set_field (Obj.repr x) 1 (Obj.repr v);
+            );
             bits0 := !bits0 lor 0x2;
           | 2 ->
-            let v =
+            field_app := (
               (
                 read_app
               ) p lb
-            in
-            Obj.set_field (Obj.repr x) 2 (Obj.repr v);
+            );
             bits0 := !bits0 lor 0x4;
           | 3 ->
-            let v =
+            field_url := (
               (
                 Ag_oj_run.read_string
               ) p lb
-            in
-            Obj.set_field (Obj.repr x) 3 (Obj.repr v);
+            );
             bits0 := !bits0 lor 0x8;
           | 4 ->
-            let v =
+            field_id := (
               (
                 Ag_oj_run.read_int
               ) p lb
-            in
-            Obj.set_field (Obj.repr x) 4 (Obj.repr v);
+            );
             bits0 := !bits0 lor 0x10;
           | 5 ->
             if not (Yojson.Safe.read_null_if_possible p lb) then (
-              let v =
+              field_note := (
                 Some (
                   (
                     Ag_oj_run.read_string
                   ) p lb
                 )
-              in
-              Obj.set_field (Obj.repr x) 5 (Obj.repr v);
+              );
             )
           | 6 ->
             if not (Yojson.Safe.read_null_if_possible p lb) then (
-              let v =
+              field_note_url := (
                 Some (
                   (
                     Ag_oj_run.read_string
                   ) p lb
                 )
-              in
-              Obj.set_field (Obj.repr x) 6 (Obj.repr v);
+              );
             )
           | _ -> (
               Yojson.Safe.skip_json p lb
@@ -1026,66 +860,59 @@ let read_authorization_response = (
         (
           match i with
             | 0 ->
-              let v =
+              field_scopes := (
                 (
                   read__1
                 ) p lb
-              in
-              Obj.set_field (Obj.repr x) 0 (Obj.repr v);
+              );
               bits0 := !bits0 lor 0x1;
             | 1 ->
-              let v =
+              field_token := (
                 (
                   Ag_oj_run.read_string
                 ) p lb
-              in
-              Obj.set_field (Obj.repr x) 1 (Obj.repr v);
+              );
               bits0 := !bits0 lor 0x2;
             | 2 ->
-              let v =
+              field_app := (
                 (
                   read_app
                 ) p lb
-              in
-              Obj.set_field (Obj.repr x) 2 (Obj.repr v);
+              );
               bits0 := !bits0 lor 0x4;
             | 3 ->
-              let v =
+              field_url := (
                 (
                   Ag_oj_run.read_string
                 ) p lb
-              in
-              Obj.set_field (Obj.repr x) 3 (Obj.repr v);
+              );
               bits0 := !bits0 lor 0x8;
             | 4 ->
-              let v =
+              field_id := (
                 (
                   Ag_oj_run.read_int
                 ) p lb
-              in
-              Obj.set_field (Obj.repr x) 4 (Obj.repr v);
+              );
               bits0 := !bits0 lor 0x10;
             | 5 ->
               if not (Yojson.Safe.read_null_if_possible p lb) then (
-                let v =
+                field_note := (
                   Some (
                     (
                       Ag_oj_run.read_string
                     ) p lb
                   )
-                in
-                Obj.set_field (Obj.repr x) 5 (Obj.repr v);
+                );
               )
             | 6 ->
               if not (Yojson.Safe.read_null_if_possible p lb) then (
-                let v =
+                field_note_url := (
                   Some (
                     (
                       Ag_oj_run.read_string
                     ) p lb
                   )
-                in
-                Obj.set_field (Obj.repr x) 6 (Obj.repr v);
+                );
               )
             | _ -> (
                 Yojson.Safe.skip_json p lb
@@ -1094,9 +921,170 @@ let read_authorization_response = (
       done;
       assert false;
     with Yojson.End_of_object -> (
-        if !bits0 <> 0x1f then Ag_oj_run.missing_fields [| !bits0 |] [| "scopes"; "token"; "app"; "url"; "id" |];
-        Ag_oj_run.identity x
+        if !bits0 <> 0x1f then Ag_oj_run.missing_fields p [| !bits0 |] [| "scopes"; "token"; "app"; "url"; "id" |];
+        (
+          {
+            scopes = !field_scopes;
+            token = !field_token;
+            app = !field_app;
+            url = !field_url;
+            id = !field_id;
+            note = !field_note;
+            note_url = !field_note_url;
+          }
+         : authorization_response)
       )
 )
 let authorization_response_of_string s =
   read_authorization_response (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
+let write_authorization_request : _ -> authorization_request -> _ = (
+  fun ob x ->
+    Bi_outbuf.add_char ob '{';
+    let is_first = ref true in
+    if !is_first then
+      is_first := false
+    else
+      Bi_outbuf.add_char ob ',';
+    Bi_outbuf.add_string ob "\"scopes\":";
+    (
+      write__1
+    )
+      ob x.auth_req_scopes;
+    if !is_first then
+      is_first := false
+    else
+      Bi_outbuf.add_char ob ',';
+    Bi_outbuf.add_string ob "\"note\":";
+    (
+      Yojson.Safe.write_string
+    )
+      ob x.auth_req_note;
+    Bi_outbuf.add_char ob '}';
+)
+let string_of_authorization_request ?(len = 1024) x =
+  let ob = Bi_outbuf.create len in
+  write_authorization_request ob x;
+  Bi_outbuf.contents ob
+let read_authorization_request = (
+  fun p lb ->
+    Yojson.Safe.read_space p lb;
+    Yojson.Safe.read_lcurl p lb;
+    let field_auth_req_scopes = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let field_auth_req_note = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let bits0 = ref 0 in
+    try
+      Yojson.Safe.read_space p lb;
+      Yojson.Safe.read_object_end lb;
+      Yojson.Safe.read_space p lb;
+      let f =
+        fun s pos len ->
+          if pos < 0 || len < 0 || pos + len > String.length s then
+            invalid_arg "out-of-bounds substring position or length";
+          match len with
+            | 4 -> (
+                if String.unsafe_get s pos = 'n' && String.unsafe_get s (pos+1) = 'o' && String.unsafe_get s (pos+2) = 't' && String.unsafe_get s (pos+3) = 'e' then (
+                  1
+                )
+                else (
+                  -1
+                )
+              )
+            | 6 -> (
+                if String.unsafe_get s pos = 's' && String.unsafe_get s (pos+1) = 'c' && String.unsafe_get s (pos+2) = 'o' && String.unsafe_get s (pos+3) = 'p' && String.unsafe_get s (pos+4) = 'e' && String.unsafe_get s (pos+5) = 's' then (
+                  0
+                )
+                else (
+                  -1
+                )
+              )
+            | _ -> (
+                -1
+              )
+      in
+      let i = Yojson.Safe.map_ident p f lb in
+      Ag_oj_run.read_until_field_value p lb;
+      (
+        match i with
+          | 0 ->
+            field_auth_req_scopes := (
+              (
+                read__1
+              ) p lb
+            );
+            bits0 := !bits0 lor 0x1;
+          | 1 ->
+            field_auth_req_note := (
+              (
+                Ag_oj_run.read_string
+              ) p lb
+            );
+            bits0 := !bits0 lor 0x2;
+          | _ -> (
+              Yojson.Safe.skip_json p lb
+            )
+      );
+      while true do
+        Yojson.Safe.read_space p lb;
+        Yojson.Safe.read_object_sep p lb;
+        Yojson.Safe.read_space p lb;
+        let f =
+          fun s pos len ->
+            if pos < 0 || len < 0 || pos + len > String.length s then
+              invalid_arg "out-of-bounds substring position or length";
+            match len with
+              | 4 -> (
+                  if String.unsafe_get s pos = 'n' && String.unsafe_get s (pos+1) = 'o' && String.unsafe_get s (pos+2) = 't' && String.unsafe_get s (pos+3) = 'e' then (
+                    1
+                  )
+                  else (
+                    -1
+                  )
+                )
+              | 6 -> (
+                  if String.unsafe_get s pos = 's' && String.unsafe_get s (pos+1) = 'c' && String.unsafe_get s (pos+2) = 'o' && String.unsafe_get s (pos+3) = 'p' && String.unsafe_get s (pos+4) = 'e' && String.unsafe_get s (pos+5) = 's' then (
+                    0
+                  )
+                  else (
+                    -1
+                  )
+                )
+              | _ -> (
+                  -1
+                )
+        in
+        let i = Yojson.Safe.map_ident p f lb in
+        Ag_oj_run.read_until_field_value p lb;
+        (
+          match i with
+            | 0 ->
+              field_auth_req_scopes := (
+                (
+                  read__1
+                ) p lb
+              );
+              bits0 := !bits0 lor 0x1;
+            | 1 ->
+              field_auth_req_note := (
+                (
+                  Ag_oj_run.read_string
+                ) p lb
+              );
+              bits0 := !bits0 lor 0x2;
+            | _ -> (
+                Yojson.Safe.skip_json p lb
+              )
+        );
+      done;
+      assert false;
+    with Yojson.End_of_object -> (
+        if !bits0 <> 0x3 then Ag_oj_run.missing_fields p [| !bits0 |] [| "scopes"; "note" |];
+        (
+          {
+            auth_req_scopes = !field_auth_req_scopes;
+            auth_req_note = !field_auth_req_note;
+          }
+         : authorization_request)
+      )
+)
+let authorization_request_of_string s =
+  read_authorization_request (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
